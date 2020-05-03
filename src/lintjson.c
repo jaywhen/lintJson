@@ -1,7 +1,7 @@
 #include "lintjson.h"
 #include <stdio.h>
-//#include <stdlib.h>
-#include <assert.h>
+//#include <stdlib.h> /* NULL */
+#include <assert.h> /* assert() */
 
 #define EXPECT(c, ch) do{ assert(*c->json == (ch)); c->json++; } while(0)
 
@@ -46,7 +46,7 @@ static int lint_parse_false(lint_context* c, lint_value* v){
     if (c->json[0] != 'a' || c->json[1] != 'l' || c->json[2] != 's' || c->json[3] != 'e')
         return LINT_PARSE_INVALID_VALUE;
     c->json += 4;
-    v->type = LINT_TRUE;
+    v->type = LINT_FALSE;
     return LINT_PARSE_OK;
 }
 
@@ -65,22 +65,25 @@ static int lint_parse_value(lint_context* c, lint_value* v){
 }
 
 
-/* 提示：这里应该是 JSON-text = ws value ws */
-/* 以下实现没处理最后的 ws 和 LEPT_PARSE_ROOT_NOT_SINGULAR */
 int lint_parse(lint_value* v, const char* json){
     lint_context c;
     assert(v != NULL);
     c.json = json;
     v->type = LINT_NULL;
     lint_parse_whitespace(&c);
-    int parse_stat = lint_parse_value(&c, v);
-    if(parse_stat == LINT_PARSE_OK){
+    int ret = lint_parse_value(&c, v);
+    if(ret == LINT_PARSE_OK){
         //如果是忽略＂前引号的话
         lint_parse_whitespace(&c);
-        return LINT_PARSE_OK;
-    }else if(c.json != '\0'){
-        return LINT_PARSE_ROOT_NOT_SINGULAR;
-    }else{
-        return parse_stat;
+        if(*c.json != '\0')
+            return ret = LINT_PARSE_ROOT_NOT_SINGULAR;
+        
     }
+    return ret;
 }
+
+lint_type lint_get_type(const lint_value* v){
+    assert(v != NULL);
+    return v->type;
+}
+
