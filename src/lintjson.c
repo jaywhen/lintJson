@@ -1,6 +1,5 @@
 #include "lintjson.h"
-#include <stdio.h>
-//#include <stdlib.h> /* NULL */
+#include <stdlib.h> /* NULL  ||ps: NULL are also included in <stdio.h> */
 #include <assert.h> /* assert() */
 
 #define EXPECT(c, ch) do{ assert(*c->json == (ch)); c->json++; } while(0)
@@ -14,7 +13,7 @@ typedef struct
 
 /* ws = *(%x20 / %x09 / %x0A / %x0D) */
 static void lint_parse_whitespace(lint_context* c){
-    const char* *p = c->json;
+    const char* p = c->json;
     while(*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r')
         p++;
     c->json = p;
@@ -73,7 +72,7 @@ int lint_parse(lint_value* v, const char* json){
     lint_parse_whitespace(&c);
     int ret = lint_parse_value(&c, v);
     if(ret == LINT_PARSE_OK){
-        //如果是忽略＂前引号的话
+        
         lint_parse_whitespace(&c);
         if(*c.json != '\0')
             return ret = LINT_PARSE_ROOT_NOT_SINGULAR;
