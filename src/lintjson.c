@@ -49,8 +49,6 @@ static int lint_parse_false(lint_context* c, lint_value* v){
     return LINT_PARSE_OK;
 }
 
-
-
 static int lint_parse_value(lint_context* c, lint_value* v){
     switch (*c->json)
     {
@@ -63,14 +61,18 @@ static int lint_parse_value(lint_context* c, lint_value* v){
 
 }
 
-
 int lint_parse(lint_value* v, const char* json){
     lint_context c;
+    int ret;
     assert(v != NULL);
     c.json = json;
     v->type = LINT_NULL;
     lint_parse_whitespace(&c);
-    int ret = lint_parse_value(&c, v);
+    
+    
+    
+    ret = lint_parse_value(&c, v);
+
     if(ret == LINT_PARSE_OK){
         
         lint_parse_whitespace(&c);
