@@ -61,15 +61,17 @@ static int lint_parse_value(lint_context* c, lint_value* v){
 
 }
 
+
+
+
 int lint_parse(lint_value* v, const char* json){
+
     lint_context c;
     int ret;
     assert(v != NULL);
     c.json = json;
     v->type = LINT_NULL;
     lint_parse_whitespace(&c);
-    
-    
     
     ret = lint_parse_value(&c, v);
 
@@ -88,3 +90,7 @@ lint_type lint_get_type(const lint_value* v){
     return v->type;
 }
 
+lint_type lint_get_number(const lint_value* v){
+    assert(v != NULL && v->type == LINT_NUMBER);
+    return v->n;
+}

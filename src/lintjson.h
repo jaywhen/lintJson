@@ -17,6 +17,7 @@ enum{
 typedef struct 
 {
     lint_type type;
+    double n;
 }lint_value;
 
 
@@ -24,5 +25,6 @@ typedef struct
 /* functions */
 int lint_parse(lint_value* v, const char* json);
 lint_type lint_get_type(const lint_value* v);
+lint_type lint_get_number(const lint_value* v);
 
  #endif  /* LINTJSON_H__ */

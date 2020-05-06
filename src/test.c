@@ -1,7 +1,6 @@
 #include "lintjson.h"
 #include <stdio.h>
 
-
 static int main_ret = 0;
 static int test_count = 0;
 static int test_pass = 0;
@@ -16,8 +15,18 @@ static int test_pass = 0;
     }\
 } while(0)
 
-
+/* expect   actual 
+ * if.....
+ */
 #define EXPECT_EQ_INT(expect, actual) EXPECT_EQ_BASE((expect)==(actual), expect, actual, "%d")
+
+#define TEST_ERROR(error, json)\
+    do {\
+        lint_value v;\
+        v.type = LINT_FALSE;\
+        EXPECT_EQ_INT(error, lint_parse(&v, json));\
+        EXPECT_EQ_INT(LINT_NULL, lint_get_type(&v));\
+    } while(0)
 
 
 static void test_parse_null() {
@@ -42,16 +51,8 @@ static void test_parse_false() {
 }
 
 static void test_parse_expect_value() {
-    lint_value v;
-
-    v.type = LINT_FALSE;
-    EXPECT_EQ_INT(LINT_PARSE_EXPECT_VALUE, lint_parse(&v, ""));
-    EXPECT_EQ_INT(LINT_NULL, lint_get_type(&v));
-
-    v.type = LINT_FALSE;
-    EXPECT_EQ_INT(LINT_PARSE_EXPECT_VALUE, lint_parse(&v, " "));
-    EXPECT_EQ_INT(LINT_NULL, lint_get_type(&v));
-
+    TEST_ERROR(LINT_PARSE_EXPECT_VALUE, "");
+    TEST_ERROR(LINT_PARSE_EXPECT_VALUE, " ");
 }
 
 static void test_parse_invalid_value() {
@@ -63,6 +64,7 @@ static void test_parse_invalid_value() {
     v.type = LINT_FALSE;
     EXPECT_EQ_INT(LINT_PARSE_INVALID_VALUE, lint_parse(&v, "?"));
     EXPECT_EQ_INT(LINT_NULL, lint_get_type(&v));
+
 }
 
 static void test_parse_root_not_singular() {
