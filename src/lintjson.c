@@ -49,8 +49,14 @@ static int lint_parse_false(lint_context* c, lint_value* v){
     return LINT_PARSE_OK;
 }
 
+static int lint_parse_literal(lint_context* c, lint_value* v) {
+
+}
+
+
 static int lint_parse_number(lint_context* c, lint_value* v) {
     char* end;
+    /* \TODO validate number */
     v->n = strtod(c->json, &end);
     /* only have string: like: "number" : string */
     if(c->json == end)
@@ -101,7 +107,7 @@ lint_type lint_get_type(const lint_value* v){
     return v->type;
 }
 
-lint_type lint_get_number(const lint_value* v){
+double lint_get_number(const lint_value* v){
     assert(v != NULL && v->type == LINT_NUMBER);
     return v->n;
 }
