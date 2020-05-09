@@ -16,6 +16,10 @@ enum{
 
 typedef struct 
 {
+    /*
+     * now value have:
+     * null/ false/ true/ number
+     */
     lint_type type;
     double n;
 }lint_value;

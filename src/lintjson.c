@@ -1,5 +1,5 @@
 #include "lintjson.h"
-#include <stdlib.h> /* NULL  ||ps: NULL are also included in <stdio.h> */
+#include <stdlib.h> /* NULL  ||ps: NULL are also included in <stdio.h> || strtod() */
 #include <assert.h> /* assert() */
 
 #define EXPECT(c, ch) do{ assert(*c->json == (ch)); c->json++; } while(0)
@@ -49,14 +49,25 @@ static int lint_parse_false(lint_context* c, lint_value* v){
     return LINT_PARSE_OK;
 }
 
+static int lint_parse_number(lint_context* c, lint_value* v) {
+    char* end;
+    v->n = strtod(c->json, &end);
+    /* only have string: like: "number" : string */
+    if(c->json == end)
+        return LINT_PARSE_INVALID_VALUE;
+    c->json = end;
+    v->type = LINT_NUMBER;
+    return LINT_PARSE_OK;
+}
+
 static int lint_parse_value(lint_context* c, lint_value* v){
     switch (*c->json)
     {
     case 'n':  return lint_parse_null(c, v);
     case 't':  return lint_parse_true(c, v);
     case 'f':  return lint_parse_false(c, v);
+    default:   return lint_parse_number(c, v);
     case '\0': return LINT_PARSE_EXPECT_VALUE;
-    default:   return LINT_PARSE_INVALID_VALUE;
     }
 
 }

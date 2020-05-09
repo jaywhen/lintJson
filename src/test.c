@@ -19,6 +19,7 @@ static int test_pass = 0;
  * if.....
  */
 #define EXPECT_EQ_INT(expect, actual) EXPECT_EQ_BASE((expect)==(actual), expect, actual, "%d")
+#define EXPECT_EQ_DOUBLE(expect, actual) EXPECT_EQ_BASE((expect)==(actual), expect, actual, "%.17g")
 
 #define TEST_ERROR(error, json)\
     do {\
@@ -28,6 +29,14 @@ static int test_pass = 0;
         EXPECT_EQ_INT(LINT_NULL, lint_get_type(&v));\
     } while(0)
 
+
+#define TEST_NUMBER(expect, json)\
+    do {\
+        lint_value v;\
+        EXPECT_EQ_INT(LINT_PARSE_OK, lint_parse(&v, json));\
+        EXPECT_EQ_INT(LINT_NUMBER, lint_get_type(&v));\
+        EXPECT_EQ_DOUBLE(expect, lint_get_number(&v));\
+    } while(0)
 
 static void test_parse_null() {
     lint_value v;
@@ -50,6 +59,25 @@ static void test_parse_false() {
     EXPECT_EQ_INT(LINT_FALSE, lint_get_type(&v));
 }
 
+static void test_parse_number() {
+    TEST_NUMBER(0.0, "0");
+    TEST_NUMBER(0.0, "-0");
+    TEST_NUMBER(0.0, "-0.0");
+    TEST_NUMBER(1.0, "1");
+    TEST_NUMBER(-1.0, "-1");
+    TEST_NUMBER(1.5, "1.5");
+    TEST_NUMBER(1E10, "1E10");
+    TEST_NUMBER(1e10, "1e10");
+    TEST_NUMBER(1E-10, "1E-10");
+    TEST_NUMBER(-1E10, "-1E10");
+    TEST_NUMBER(-1e10, "-1e10");
+    TEST_NUMBER(-1E+10, "-1E+10");
+    TEST_NUMBER(-1E-10, "-1E-10");
+    TEST_NUMBER(1.234E+10, "1.234E+10");
+    TEST_NUMBER(1.234E-10, "1.234E-10");
+    TEST_NUMBER(0.0, "1e-10000"); /* must underflow */
+}
+
 static void test_parse_expect_value() {
     TEST_ERROR(LINT_PARSE_EXPECT_VALUE, "");
     TEST_ERROR(LINT_PARSE_EXPECT_VALUE, " ");
@@ -64,6 +92,17 @@ static void test_parse_invalid_value() {
     v.type = LINT_FALSE;
     EXPECT_EQ_INT(LINT_PARSE_INVALID_VALUE, lint_parse(&v, "?"));
     EXPECT_EQ_INT(LINT_NULL, lint_get_type(&v));
+    /**/
+    /* invalid number */
+    TEST_ERROR(LINT_PARSE_INVALID_VALUE, "+0");
+    TEST_ERROR(LINT_PARSE_INVALID_VALUE, "+1");
+    TEST_ERROR(LINT_PARSE_INVALID_VALUE, ".123");
+
+    TEST_ERROR(LINT_PARSE_INVALID_VALUE, "1.");
+    TEST_ERROR(LINT_PARSE_INVALID_VALUE, "23.");
+
+    TEST_ERROR(LINT_PARSE_INVALID_VALUE, "WHOIAM");
+    TEST_ERROR(LINT_PARSE_INVALID_VALUE, "HP:1000");
 
 }
 
