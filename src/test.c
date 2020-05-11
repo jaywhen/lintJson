@@ -101,6 +101,7 @@ static void test_parse_invalid_value() {
 
     /**/
     /* invalid number */
+    /* need to add some*/
     TEST_ERROR(LINT_PARSE_INVALID_VALUE, "+0");
     TEST_ERROR(LINT_PARSE_INVALID_VALUE, "+1");
     TEST_ERROR(LINT_PARSE_INVALID_VALUE, ".123");
@@ -126,6 +127,7 @@ static void test_parse_root_not_singular() {
 
     TEST_ERROR(LINT_PARSE_ROOT_NOT_SINGULAR, "null x");
     
+    /* need to add some */
     TEST_ERROR(LINT_PARSE_ROOT_NOT_SINGULAR, "0123");
     TEST_ERROR(LINT_PARSE_ROOT_NOT_SINGULAR, "0x0");
     TEST_ERROR(LINT_PARSE_ROOT_NOT_SINGULAR, "0x123");
@@ -133,6 +135,7 @@ static void test_parse_root_not_singular() {
 }
 
 static void test_parse_number_too_big() {
+    /* add some? */
     TEST_ERROR(LINT_PARSE_NUMBER_TOO_BIG, "1e309");
     TEST_ERROR(LINT_PARSE_NUMBER_TOO_BIG, "-1e309");
 }
