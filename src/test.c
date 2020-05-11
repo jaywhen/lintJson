@@ -84,6 +84,8 @@ static void test_parse_expect_value() {
 }
 
 static void test_parse_invalid_value() {
+    /*
+     *
     lint_value v;
     v.type = LINT_FALSE;
     EXPECT_EQ_INT(LINT_PARSE_INVALID_VALUE, lint_parse(&v, "nul"));
@@ -92,6 +94,11 @@ static void test_parse_invalid_value() {
     v.type = LINT_FALSE;
     EXPECT_EQ_INT(LINT_PARSE_INVALID_VALUE, lint_parse(&v, "?"));
     EXPECT_EQ_INT(LINT_NULL, lint_get_type(&v));
+     *
+     */
+    TEST_ERROR(LINT_PARSE_INVALID_VALUE, "nul");
+    TEST_ERROR(LINT_PARSE_INVALID_VALUE, "?");
+
     /**/
     /* invalid number */
     TEST_ERROR(LINT_PARSE_INVALID_VALUE, "+0");
@@ -107,20 +114,38 @@ static void test_parse_invalid_value() {
 }
 
 static void test_parse_root_not_singular() {
+
+    /*
+     *
+     * 
     lint_value v;
     v.type = LINT_FALSE;
     EXPECT_EQ_INT(LINT_PARSE_ROOT_NOT_SINGULAR, lint_parse(&v, "null x"));
     EXPECT_EQ_INT(LINT_NULL, lint_get_type(&v));
+    */
 
+    TEST_ERROR(LINT_PARSE_ROOT_NOT_SINGULAR, "null x");
+    
+    TEST_ERROR(LINT_PARSE_ROOT_NOT_SINGULAR, "0123");
+    TEST_ERROR(LINT_PARSE_ROOT_NOT_SINGULAR, "0x0");
+    TEST_ERROR(LINT_PARSE_ROOT_NOT_SINGULAR, "0x123");
+    
+}
+
+static void test_parse_number_too_big() {
+    TEST_ERROR(LINT_PARSE_NUMBER_TOO_BIG, "1e309");
+    TEST_ERROR(LINT_PARSE_NUMBER_TOO_BIG, "-1e309");
 }
 
 static void test_parse() {
     test_parse_null();
     test_parse_true();
     test_parse_false();
+    test_parse_number();
     test_parse_expect_value();
     test_parse_invalid_value();
     test_parse_root_not_singular();
+    test_parse_number_too_big();
 }
 
 int main() {
