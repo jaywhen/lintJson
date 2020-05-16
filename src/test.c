@@ -96,12 +96,17 @@ static void test_parse_invalid_value() {
     EXPECT_EQ_INT(LINT_NULL, lint_get_type(&v));
      *
      */
+
+    #if 1
     TEST_ERROR(LINT_PARSE_INVALID_VALUE, "nul");
     TEST_ERROR(LINT_PARSE_INVALID_VALUE, "?");
+    #endif
+
 
     /**/
     /* invalid number */
     /* need to add some*/
+    #if 0
     TEST_ERROR(LINT_PARSE_INVALID_VALUE, "+0");
     TEST_ERROR(LINT_PARSE_INVALID_VALUE, "+1");
     TEST_ERROR(LINT_PARSE_INVALID_VALUE, ".123");
@@ -111,6 +116,7 @@ static void test_parse_invalid_value() {
 
     TEST_ERROR(LINT_PARSE_INVALID_VALUE, "WHOIAM");
     TEST_ERROR(LINT_PARSE_INVALID_VALUE, "HP:1000");
+    #endif
 
 }
 
@@ -128,16 +134,20 @@ static void test_parse_root_not_singular() {
     TEST_ERROR(LINT_PARSE_ROOT_NOT_SINGULAR, "null x");
     
     /* need to add some */
+    #if 0
     TEST_ERROR(LINT_PARSE_ROOT_NOT_SINGULAR, "0123");
     TEST_ERROR(LINT_PARSE_ROOT_NOT_SINGULAR, "0x0");
     TEST_ERROR(LINT_PARSE_ROOT_NOT_SINGULAR, "0x123");
+    #endif
     
 }
 
 static void test_parse_number_too_big() {
     /* add some? */
+    #if 0
     TEST_ERROR(LINT_PARSE_NUMBER_TOO_BIG, "1e309");
     TEST_ERROR(LINT_PARSE_NUMBER_TOO_BIG, "-1e309");
+    #endif
 }
 
 static void test_parse() {
