@@ -19,7 +19,7 @@ first build successful:
 
 can parse: double\ NULL\ TRUE\ FALSE
 
-![](img/step2.png)
+![step2](img/step2.png)
 
 
 
