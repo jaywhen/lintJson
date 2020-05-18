@@ -1,11 +1,11 @@
 # lintJson 
 
-### Brief
+### BRIEF
 * A `JSON` parser with less than 600 lines codes 
 * Written by `C`
 * The most elegant code I've ever written
 
-### Log
+### LOG
 
 2020/5/6:
 
@@ -15,3 +15,14 @@ first build successful:
 
 
 
+2020/5/18:
+
+can parse: double\ NULL\ TRUE\ FALSE
+
+![](img/step2.png)
+
+
+
+### RECORD
+
+* [Notes](Note/Note.md)
