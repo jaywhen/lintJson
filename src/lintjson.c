@@ -1,8 +1,11 @@
 #include "lintjson.h"
 #include <stdlib.h> /* NULL  ||ps: NULL are also included in <stdio.h> || strtod() */
 #include <assert.h> /* assert() */
-
+#include <errno.h>  /* errno, ERANGE */
+#include <math.h>
 #define EXPECT(c, ch) do{ assert(*c->json == (ch)); c->json++; } while(0)
+#define ISDIGIT(ch) ( (ch) >='0' && (ch) <= '9' )
+#define ISDIGIT1TO9(ch) ( (ch) >= '1' && (ch) <= '9' )
 
 typedef struct
 {
@@ -68,14 +71,49 @@ static int lint_parse_literal(lint_context* c, lint_value* v, const char* litera
 
 
 static int lint_parse_number(lint_context* c, lint_value* v) {
-    char* end;
-    /* \TODO validate number */
-    v->n = strtod(c->json, &end);
+    const char* p = c->json;
+    /* \TODO validate number 
+     * ---------------------
+     * number = [ "-" ] int [ frac ] [ exp ]
+     * int = "0" / digit1-9 *digit
+     * frac = "." 1*digit
+     * exp = ("e" / "E") ["-" / "+"] 1*digit 
+     * ---------------------
+     */
+    /* '-' */
+    if(*p=='-') p++;
+
+    /* int */
+    if(*p == '0') p++; /* is '0'  skip it */
+    else
+    {
+        if( !ISDIGIT1TO9(*p) ) return LINT_PARSE_INVALID_VALUE;
+
+        for (p++; ISDIGIT(*p); p++); 
+    }
+    
+    /* decimal */
+    if(*p == '.') {
+        p++;
+        if(!ISDIGIT(*p)) return LINT_PARSE_INVALID_VALUE;
+        for(p++; ISDIGIT(*p); p++);
+    }
+
+    /* index number(exp) */
+
+    if(*p == 'e' || *p =='E') {
+        p++;
+        if(*p == '-' || *p == '+') ++p;
+        if(! ISDIGIT(*p) ) return LINT_PARSE_INVALID_VALUE;
+        for (++p; ISDIGIT(*p); ++p);
+    }
+
+    errno = 0;
+    v->n = strtod(c->json, NULL);
     /* only have string: like: "number" : string */
-    if(c->json == end)
-        return LINT_PARSE_INVALID_VALUE;
-    c->json = end;
+    if(errno == ERANGE && v->n == HUGE_VAL) return LINT_PARSE_NUMBER_TOO_BIG;
     v->type = LINT_NUMBER;
+    c->json = p;
     return LINT_PARSE_OK;
 }
 
@@ -108,8 +146,10 @@ int lint_parse(lint_value* v, const char* json){
     if(ret == LINT_PARSE_OK){
         
         lint_parse_whitespace(&c);
-        if(*c.json != '\0')
-            return ret = LINT_PARSE_ROOT_NOT_SINGULAR;
+        if(*c.json != '\0') ｛
+        v->type = LINT_NULL;
+        return ret = LINT_PARSE_ROOT_NOT_SINGULAR;
+        ｝
         
     }
     return ret;

@@ -1,0 +1,2 @@
+/usr/bin/ar qc liblintjson.a  CMakeFiles/lintjson.dir/lintjson.c.o
+/usr/bin/ranlib liblintjson.a

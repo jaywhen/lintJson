@@ -1,0 +1,4 @@
+/home/when/lintJson/src/CMakeFiles/edit_cache.dir
+/home/when/lintJson/src/CMakeFiles/rebuild_cache.dir
+/home/when/lintJson/src/CMakeFiles/lintjson.dir
+/home/when/lintJson/src/CMakeFiles/lintjson_test.dir

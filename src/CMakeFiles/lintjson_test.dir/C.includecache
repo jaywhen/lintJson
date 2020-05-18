@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/when/lintJson/src/lintjson.h
+
+/home/when/lintJson/src/test.c
+lintjson.h
+/home/when/lintJson/src/lintjson.h
+stdio.h
+-
+

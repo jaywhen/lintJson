@@ -67,6 +67,17 @@ static void test_parse_number() {
     TEST_NUMBER(1.234E+10, "1.234E+10");
     TEST_NUMBER(1.234E-10, "1.234E-10");
     TEST_NUMBER(0.0, "1e-10000"); /* must underflow */
+
+    /* wikipedia.org: Double-precision_floating-point_format */
+    TEST_NUMBER(1.0000000000000002, "1.0000000000000002"); /* the smallest number > 1 */
+    TEST_NUMBER( 4.9406564584124654e-324, "4.9406564584124654e-324"); /* minimum denormal */
+    TEST_NUMBER(-4.9406564584124654e-324, "-4.9406564584124654e-324");
+    TEST_NUMBER( 2.2250738585072009e-308, "2.2250738585072009e-308");  /* Max subnormal double */
+    TEST_NUMBER(-2.2250738585072009e-308, "-2.2250738585072009e-308");
+    TEST_NUMBER( 2.2250738585072014e-308, "2.2250738585072014e-308");  /* Min normal positive double */
+    TEST_NUMBER(-2.2250738585072014e-308, "-2.2250738585072014e-308");
+    TEST_NUMBER( 1.7976931348623157e+308, "1.7976931348623157e+308");  /* Max double */
+    TEST_NUMBER(-1.7976931348623157e+308, "-1.7976931348623157e+308");
 }
 
 #define TEST_ERROR(error, json)\
@@ -105,11 +116,11 @@ static void test_parse_invalid_value() {
 
     /**/
     /* invalid number */
-    /* need to add some*/
-    #if 0
+    #if 1
     TEST_ERROR(LINT_PARSE_INVALID_VALUE, "+0");
     TEST_ERROR(LINT_PARSE_INVALID_VALUE, "+1");
     TEST_ERROR(LINT_PARSE_INVALID_VALUE, ".123");
+    TEST_ERROR(LINT_PARSE_INVALID_VALUE, "09123");
 
     TEST_ERROR(LINT_PARSE_INVALID_VALUE, "1.");
     TEST_ERROR(LINT_PARSE_INVALID_VALUE, "23.");
@@ -122,7 +133,7 @@ static void test_parse_invalid_value() {
 
 static void test_parse_root_not_singular() {
 
-    /*
+    /*  
      *
      * 
     lint_value v;
@@ -134,7 +145,7 @@ static void test_parse_root_not_singular() {
     TEST_ERROR(LINT_PARSE_ROOT_NOT_SINGULAR, "null x");
     
     /* need to add some */
-    #if 0
+    #if 1
     TEST_ERROR(LINT_PARSE_ROOT_NOT_SINGULAR, "0123");
     TEST_ERROR(LINT_PARSE_ROOT_NOT_SINGULAR, "0x0");
     TEST_ERROR(LINT_PARSE_ROOT_NOT_SINGULAR, "0x123");
@@ -144,7 +155,7 @@ static void test_parse_root_not_singular() {
 
 static void test_parse_number_too_big() {
     /* add some? */
-    #if 0
+    #if 1
     TEST_ERROR(LINT_PARSE_NUMBER_TOO_BIG, "1e309");
     TEST_ERROR(LINT_PARSE_NUMBER_TOO_BIG, "-1e309");
     #endif
