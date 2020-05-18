@@ -1,1 +1,0 @@
-/usr/bin/cc  -ansi -pedantic -Wall  -rdynamic CMakeFiles/lintjson_test.dir/test.c.o  -o lintjson_test  liblintjson.a 

@@ -3,25 +3,28 @@
 #include <assert.h> /* assert() */
 #include <errno.h>  /* errno, ERANGE */
 #include <math.h>
-#define EXPECT(c, ch) do{ assert(*c->json == (ch)); c->json++; } while(0)
-#define ISDIGIT(ch) ( (ch) >='0' && (ch) <= '9' )
-#define ISDIGIT1TO9(ch) ( (ch) >= '1' && (ch) <= '9' )
+#define EXPECT(c, ch)             \
+    do                            \
+    {                             \
+        assert(*c->json == (ch)); \
+        c->json++;                \
+    } while (0)
+#define ISDIGIT(ch) ((ch) >= '0' && (ch) <= '9')
+#define ISDIGIT1TO9(ch) ((ch) >= '1' && (ch) <= '9')
 
 typedef struct
 {
-    const char* json;
-}lint_context;
-
-
+    const char *json;
+} lint_context;
 
 /* ws = *(%x20 / %x09 / %x0A / %x0D) */
-static void lint_parse_whitespace(lint_context* c){
-    const char* p = c->json;
-    while(*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r')
+static void lint_parse_whitespace(lint_context *c)
+{
+    const char *p = c->json;
+    while (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r')
         p++;
     c->json = p;
 }
-
 
 /* null = "null" */
 
@@ -57,21 +60,22 @@ static int lint_parse_false(lint_context* c, lint_value* v){
  */
 /* combine/merge above functions */
 
-static int lint_parse_literal(lint_context* c, lint_value* v, const char* literal, lint_type type) {
+static int lint_parse_literal(lint_context *c, lint_value *v, const char *literal, lint_type type)
+{
     /* to use size_t in array*/
     size_t i;
     EXPECT(c, literal[0]);
-    for(i=0; literal[i+1]; ++i)
-        if(c->json[i] != literal[i+1])
+    for (i = 0; literal[i + 1]; ++i)
+        if (c->json[i] != literal[i + 1])
             return LINT_PARSE_INVALID_VALUE;
     c->json += i;
     v->type = type;
     return LINT_PARSE_OK;
 }
 
-
-static int lint_parse_number(lint_context* c, lint_value* v) {
-    const char* p = c->json;
+static int lint_parse_number(lint_context *c, lint_value *v)
+{
+    const char *p = c->json;
     /* \TODO validate number 
      * ---------------------
      * number = [ "-" ] int [ frac ] [ exp ]
@@ -81,58 +85,73 @@ static int lint_parse_number(lint_context* c, lint_value* v) {
      * ---------------------
      */
     /* '-' */
-    if(*p=='-') p++;
+    if (*p == '-')
+        p++;
 
     /* int */
-    if(*p == '0') p++; /* is '0'  skip it */
+    if (*p == '0')
+        p++; /* is '0'  skip it */
     else
     {
-        if( !ISDIGIT1TO9(*p) ) return LINT_PARSE_INVALID_VALUE;
+        if (!ISDIGIT1TO9(*p))
+            return LINT_PARSE_INVALID_VALUE;
 
-        for (p++; ISDIGIT(*p); p++); 
+        for (p++; ISDIGIT(*p); p++)
+            ;
     }
-    
+
     /* decimal */
-    if(*p == '.') {
+    if (*p == '.')
+    {
         p++;
-        if(!ISDIGIT(*p)) return LINT_PARSE_INVALID_VALUE;
-        for(p++; ISDIGIT(*p); p++);
+        if (!ISDIGIT(*p))
+            return LINT_PARSE_INVALID_VALUE;
+        for (p++; ISDIGIT(*p); p++)
+            ;
     }
 
     /* index number(exp) */
 
-    if(*p == 'e' || *p =='E') {
+    if (*p == 'e' || *p == 'E')
+    {
         p++;
-        if(*p == '-' || *p == '+') ++p;
-        if(! ISDIGIT(*p) ) return LINT_PARSE_INVALID_VALUE;
-        for (++p; ISDIGIT(*p); ++p);
+        if (*p == '-' || *p == '+')
+            ++p;
+        if (!ISDIGIT(*p))
+            return LINT_PARSE_INVALID_VALUE;
+        for (++p; ISDIGIT(*p); ++p)
+            ;
     }
 
     errno = 0;
     v->n = strtod(c->json, NULL);
     /* only have string: like: "number" : string */
-    if(errno == ERANGE && v->n == HUGE_VAL) return LINT_PARSE_NUMBER_TOO_BIG;
+    if (errno == ERANGE && (v->n == HUGE_VAL || v->n == -HUGE_VAL))
+        return LINT_PARSE_NUMBER_TOO_BIG;
     v->type = LINT_NUMBER;
     c->json = p;
     return LINT_PARSE_OK;
 }
 
-static int lint_parse_value(lint_context* c, lint_value* v){
+static int lint_parse_value(lint_context *c, lint_value *v)
+{
     switch (*c->json)
     {
-    case 'n':  return lint_parse_literal(c, v, "null", LINT_NULL);
-    case 't':  return lint_parse_literal(c, v, "true", LINT_TRUE);
-    case 'f':  return lint_parse_literal(c, v, "false", LINT_FALSE);
-    default:   return lint_parse_number(c, v);
-    case '\0': return LINT_PARSE_EXPECT_VALUE;
+    case 'n':
+        return lint_parse_literal(c, v, "null", LINT_NULL);
+    case 't':
+        return lint_parse_literal(c, v, "true", LINT_TRUE);
+    case 'f':
+        return lint_parse_literal(c, v, "false", LINT_FALSE);
+    default:
+        return lint_parse_number(c, v);
+    case '\0':
+        return LINT_PARSE_EXPECT_VALUE;
     }
-
 }
 
-
-
-
-int lint_parse(lint_value* v, const char* json){
+int lint_parse(lint_value *v, const char *json)
+{
 
     lint_context c;
     int ret;
@@ -140,27 +159,29 @@ int lint_parse(lint_value* v, const char* json){
     c.json = json;
     v->type = LINT_NULL;
     lint_parse_whitespace(&c);
-    
+
     ret = lint_parse_value(&c, v);
 
-    if(ret == LINT_PARSE_OK){
-        
+    if (ret == LINT_PARSE_OK)
+    {
+
         lint_parse_whitespace(&c);
-        if(*c.json != '\0') ｛
-        v->type = LINT_NULL;
-        return ret = LINT_PARSE_ROOT_NOT_SINGULAR;
-        ｝
-        
+        if (*c.json != '\0') {
+                v->type = LINT_NULL;
+                ret = LINT_PARSE_ROOT_NOT_SINGULAR;
+        }
     }
     return ret;
 }
 
-lint_type lint_get_type(const lint_value* v){
+lint_type lint_get_type(const lint_value *v)
+{
     assert(v != NULL);
     return v->type;
 }
 
-double lint_get_number(const lint_value* v){
+double lint_get_number(const lint_value *v)
+{
     assert(v != NULL && v->type == LINT_NUMBER);
     return v->n;
 }
