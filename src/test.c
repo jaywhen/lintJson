@@ -4,6 +4,7 @@
 static int main_ret = 0;
 static int test_count = 0;
 static int test_pass = 0;
+
 #define EXPECT_EQ_BASE(equality, expect, actual, format) \
     do {\
     test_count++;\
@@ -14,7 +15,6 @@ static int test_pass = 0;
         main_ret = 1;\
     }\
 } while(0)
-
 
 #define EXPECT_EQ_INT(expect, actual) EXPECT_EQ_BASE((expect)==(actual), expect, actual, "%d")
 #define EXPECT_EQ_DOUBLE(expect, actual) EXPECT_EQ_BASE((expect)==(actual), expect, actual, "%.17g")
@@ -126,6 +126,8 @@ static void test_parse_invalid_value() {
 
     TEST_ERROR(LINT_PARSE_INVALID_VALUE, "WHOIAM");
     TEST_ERROR(LINT_PARSE_INVALID_VALUE, "HP:1000");
+    TEST_ERROR(LINT_PARSE_INVALID_VALUE, "nan");
+    TEST_ERROR(LINT_PARSE_INVALID_VALUE, "NAN");
     #endif
 
 }
@@ -172,9 +174,8 @@ static void test_parse() {
 }
 
 int main() {
-    
     test_parse();
-    printf("%d/%d (%3.2f%%) passed\n", test_pass, test_count, test_pass * 100.0 / test_count);
+    printf("%d / %d (%3.2f%%) passed\n", test_pass, test_count, test_pass * 100.0 / test_count);
     return main_ret;
 }
 

@@ -1,14 +1,11 @@
 #include "lintjson.h"
-#include <stdlib.h> /* NULL  ||ps: NULL are also included in <stdio.h> || strtod() */
+#include <stdlib.h> /* NULL ; strtod() ; size_t ; free ; malloc */
 #include <assert.h> /* assert() */
 #include <errno.h>  /* errno, ERANGE */
-#include <math.h>
-#define EXPECT(c, ch)             \
-    do                            \
-    {                             \
-        assert(*c->json == (ch)); \
-        c->json++;                \
-    } while (0)
+#include <math.h>   /* HUGE_VAL */
+#include <string.h> /* memcpy */
+
+#define EXPECT(c, ch) do{ assert(*c->json == (ch)); c->json++; } while (0)
 #define ISDIGIT(ch) ((ch) >= '0' && (ch) <= '9')
 #define ISDIGIT1TO9(ch) ((ch) >= '1' && (ch) <= '9')
 
@@ -184,4 +181,27 @@ double lint_get_number(const lint_value *v)
 {
     assert(v != NULL && v->type == LINT_NUMBER);
     return v->n;
+}
+
+/* free */
+void lint_free(lint_value* v) {
+    assert(v != NULL);
+    if (v->type == LINT_STRING)
+        free(v->u.s.s);
+    
+    /* avoid repeated free */
+    v->type = LINT_NULL;
+}
+
+void lint_set_string(lint_value* v, const char* s, size_t len) {
+    assert(v != NULL && (s != NULL || len == 0));
+    /* copy */
+    lint_free(v);
+    v->u.s.s = (char*)malloc(len + 1);
+    memcpy(v->u.s.s, s, len);
+
+    /* set */
+    v->u.s.s[len] = '\0'; /* cuz array's index is from 0 to ... */
+    v->u.s.len = len;
+    v->type = LINT_STRING;
 }
