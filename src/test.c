@@ -1,6 +1,6 @@
 #include "lintjson.h"
 #include <stdio.h>
-
+#include <string.h>
 static int main_ret = 0;
 static int test_count = 0;
 static int test_pass = 0;
@@ -18,7 +18,9 @@ static int test_pass = 0;
 
 #define EXPECT_EQ_INT(expect, actual) EXPECT_EQ_BASE((expect)==(actual), expect, actual, "%d")
 #define EXPECT_EQ_DOUBLE(expect, actual) EXPECT_EQ_BASE((expect)==(actual), expect, actual, "%.17g")
-
+/* "expect" is a string literal */
+#define EXPECT_EQ_STRING(expect, actual, slength) \
+        EXPECT_EQ_BASE( (sizeof(expect)-1 == slength && memcmp(expect, actual, slength) == 0 ), expect, actual, "%s")
 
 
 static void test_parse_null() {
@@ -162,6 +164,19 @@ static void test_parse_number_too_big() {
     #endif
 }
 
+
+static void test_access_string() {  
+    lint_value v;
+    lint_init(&v);
+    lint_set_string(&v, "", 0);
+    EXPECT_EQ_STRING("", lint_get_string(&v), lint_get_string_length(&v));
+
+    lint_set_string(&v, "Hello", 5);
+    EXPECT_EQ_STRING("Hello", lint_get_string(&v), lint_get_string_length(&v));
+    lint_free(&v);
+
+}
+
 static void test_parse() {
     test_parse_null();
     test_parse_true();
@@ -171,6 +186,7 @@ static void test_parse() {
     test_parse_invalid_value();
     test_parse_root_not_singular();
     test_parse_number_too_big();
+    test_access_string();
 }
 
 int main() {

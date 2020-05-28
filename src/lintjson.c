@@ -11,13 +11,15 @@
 
 typedef struct
 {
-    const char *json;
+    const char* json;
+    char* stack;
+    size_t size, top;
 } lint_context;
 
 /* ws = *(%x20 / %x09 / %x0A / %x0D) */
-static void lint_parse_whitespace(lint_context *c)
+static void lint_parse_whitespace(lint_context* c)
 {
-    const char *p = c->json;
+    const char* p = c->json;
     while (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r')
         p++;
     c->json = p;
@@ -57,7 +59,7 @@ static int lint_parse_false(lint_context* c, lint_value* v){
  */
 /* combine/merge above functions */
 
-static int lint_parse_literal(lint_context *c, lint_value *v, const char *literal, lint_type type)
+static int lint_parse_literal(lint_context* c, lint_value* v, const char* literal, lint_type type)
 {
     /* to use size_t in array*/
     size_t i;
@@ -70,9 +72,9 @@ static int lint_parse_literal(lint_context *c, lint_value *v, const char *litera
     return LINT_PARSE_OK;
 }
 
-static int lint_parse_number(lint_context *c, lint_value *v)
+static int lint_parse_number(lint_context* c, lint_value* v)
 {
-    const char *p = c->json;
+    const char* p = c->json;
     /* \TODO validate number 
      * ---------------------
      * number = [ "-" ] int [ frac ] [ exp ]
@@ -121,16 +123,16 @@ static int lint_parse_number(lint_context *c, lint_value *v)
     }
 
     errno = 0;
-    v->n = strtod(c->json, NULL);
+    v->u.n = strtod(c->json, NULL);
     /* only have string: like: "number" : string */
-    if (errno == ERANGE && (v->n == HUGE_VAL || v->n == -HUGE_VAL))
+    if (errno == ERANGE && (v->u.n == HUGE_VAL || v->u.n == -HUGE_VAL))
         return LINT_PARSE_NUMBER_TOO_BIG;
     v->type = LINT_NUMBER;
     c->json = p;
     return LINT_PARSE_OK;
 }
 
-static int lint_parse_value(lint_context *c, lint_value *v)
+static int lint_parse_value(lint_context* c, lint_value* v)
 {
     switch (*c->json)
     {
@@ -147,14 +149,16 @@ static int lint_parse_value(lint_context *c, lint_value *v)
     }
 }
 
-int lint_parse(lint_value *v, const char *json)
+int lint_parse(lint_value* v, const char* json)
 {
 
     lint_context c;
     int ret;
     assert(v != NULL);
     c.json = json;
-    v->type = LINT_NULL;
+    c.stack = NULL;
+    c.size = c.top = 0;
+    lint_init(v); /* v->type = LINT_NULL; */
     lint_parse_whitespace(&c);
 
     ret = lint_parse_value(&c, v);
@@ -168,19 +172,21 @@ int lint_parse(lint_value *v, const char *json)
                 ret = LINT_PARSE_ROOT_NOT_SINGULAR;
         }
     }
+    assert(c.top == 0);
+    free(c.stack);
     return ret;
 }
 
-lint_type lint_get_type(const lint_value *v)
+lint_type lint_get_type(const lint_value* v)
 {
     assert(v != NULL);
     return v->type;
 }
 
-double lint_get_number(const lint_value *v)
+double lint_get_number(const lint_value* v)
 {
     assert(v != NULL && v->type == LINT_NUMBER);
-    return v->n;
+    return v->u.n;
 }
 
 /* free */
@@ -193,6 +199,8 @@ void lint_free(lint_value* v) {
     v->type = LINT_NULL;
 }
 
+
+/* string's set && get */
 void lint_set_string(lint_value* v, const char* s, size_t len) {
     assert(v != NULL && (s != NULL || len == 0));
     /* copy */
@@ -204,4 +212,14 @@ void lint_set_string(lint_value* v, const char* s, size_t len) {
     v->u.s.s[len] = '\0'; /* cuz array's index is from 0 to ... */
     v->u.s.len = len;
     v->type = LINT_STRING;
+}
+
+size_t lint_get_string_length(const lint_value* v) {
+    assert(v != NULL && v->type == LINT_STRING);
+    return v->u.s.len;
+}
+
+const char* lint_get_string(const lint_value* v) {
+    assert(v != NULL && v->type == LINT_STRING);
+    return v->u.s.s;
 }

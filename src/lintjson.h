@@ -1,8 +1,6 @@
 #ifndef LINTJSON_H__
 #define LINTJSON_H__
-
-
-
+#include <stddef.h> /* size_t */
 /* store data type*/
 typedef enum {
     LINT_NULL, 
@@ -21,6 +19,7 @@ typedef struct
      * now value have:
      * null/ false/ true/ number
      */
+    
     lint_type type;
     union {
         struct { char* s; size_t len; }s; /* string */
@@ -44,7 +43,6 @@ enum{
 
 void lint_free(lint_value* v);
 
-/* ---------------------functions--------------------- */
 int lint_parse(lint_value* v, const char* json);
 
 lint_type lint_get_type(const lint_value* v);

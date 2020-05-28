@@ -10,3 +10,4 @@ static void test_parse_number_too_big()
 -----2020/5/18
 
 begin step3
+parse string
