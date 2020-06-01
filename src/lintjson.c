@@ -5,16 +5,60 @@
 #include <math.h>   /* HUGE_VAL */
 #include <string.h> /* memcpy */
 
+#ifndef LINT_PARSE_INIT_STACK_SIZE
+#define LINT_PARSE_INT_STACK_SIZE 256
+#endif
+
 #define EXPECT(c, ch) do{ assert(*c->json == (ch)); c->json++; } while (0)
 #define ISDIGIT(ch) ((ch) >= '0' && (ch) <= '9')
 #define ISDIGIT1TO9(ch) ((ch) >= '1' && (ch) <= '9')
 
+/* create a dynamic stack */
 typedef struct
 {
-    const char* json;
-    char* stack;
-    size_t size, top;
+    const char* json; /* json text */
+    char* stack;      
+    size_t size, top; /* stack's size && top */
 } lint_context;
+
+
+/* stack's push */
+static void* lint_context_push(lint_context* c, size_t size) {
+    void* ret;
+    assert(size > 0);
+
+    if(c->top + size >= c->size) {
+        if(c->size == 0) {
+            c->size = LINT_PARSE_INT_STACK_SIZE;
+        }
+        while (c->top + size >= c->size)
+        {   /* if the space is not enough */
+            /* expend it as 1.5 times */
+            c->size += c->size >> 1; /* c->size * 1.5 ?? */
+        }
+
+        c->stack = (char*) realloc(c->stack, c->size);
+    }
+
+    ret = c->stack + c->size;
+    c->top += size;
+    return ret;
+}
+
+static void* lint_context_pop(lint_context* c, size_t size) {
+    assert(c->top >= size);
+    return c->stack + (c->top -= size);
+}
+
+
+
+/* stack's pop */
+
+
+
+
+
+
 
 /* ws = *(%x20 / %x09 / %x0A / %x0D) */
 static void lint_parse_whitespace(lint_context* c)
@@ -172,7 +216,7 @@ int lint_parse(lint_value* v, const char* json)
                 ret = LINT_PARSE_ROOT_NOT_SINGULAR;
         }
     }
-    assert(c.top == 0);
+    assert(c.top == 0);  /* assert all data push out */
     free(c.stack);
     return ret;
 }
